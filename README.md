@@ -4,7 +4,8 @@ Heroku Buildpack Shiny
 This is a Heroku buildpack for the [Shiny](http://www.rstudio.com/shiny/) web
 framework that runs on [R](http://www.r-project.org/).
 
-Check it out: http://shiny-example-1.herokuapp.com/
+Check it out: http://shiny-example-1.herokuapp.com/.  The source for that is at
+https://github.com/btubbs/shiny-example-1.
 
 Instructions
 ------------
@@ -25,6 +26,17 @@ To deploy an app using this buildpack, do the following:
 
   git push heroku
 
+
+Notes
+-----
+
 This buildpack does not use
 [shiny-server](https://github.com/rstudio/shiny-server). That might change in
 the future if just running plain old Shiny turns out to be problematic.
+
+The version of R installed by this buildpack is 3.0.2.
+
+The real heavy lifting of getting R to build on Heroku was done by Chris
+Stefano (aka [virtualstaticvoid](https://github.com/virtualstaticvoid)) in his
+[buildpack for R](https://github.com/virtualstaticvoid/heroku-buildpack-r).
+Thanks Chris!
