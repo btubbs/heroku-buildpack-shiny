@@ -24,11 +24,11 @@ To deploy an app using this buildpack, do the following:
 5. Enable [Heroku websockets support](https://blog.heroku.com/archives/2013/10/8/websockets-public-beta).
 6. Tell Heroku to use this custom buildpack for your app:
 
-  heroku config:set BUILDPACK_URL=https://github.com/btubbs/heroku-buildpack-shiny.git
+    heroku config:set BUILDPACK_URL=https://github.com/btubbs/heroku-buildpack-shiny.git
 
 7. Type this:
 
-  git push heroku
+    git push heroku
 
 
 Notes
