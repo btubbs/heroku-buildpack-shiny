@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# bin/release <build-dir>
+
+cat <<EOF
+---
+config_vars:
+  PATH: /app/vendor/R/bin:bin:/app/vendor/gcc-4.3/bin:/usr/local/bin:/usr/bin:/bin
+  R_HOME: /app/vendor/R
+  R_INCLUDE: /app/vendor/R/lib64/R/include
+  LDFLAGS: "-L/app/vendor/gcc-4.3/lib64"
+  CPPFLAGS: "-I/app/vendor/glibc-2.7/string -I/app/vendor/glibc-2.7/time -I/app/vendor/cairo/include/cairo/include"
+  LD_LIBRARY_PATH: "/app/vendor/cairo:/app/vendor/fontconfig:/app/vendor/pixman:/app/vendor/libpng:/app/vendor/DirectFB:/app/vendor/freetype"
+  R_INCLUDE: /app/vendor/R/lib64/R/include
+  PKG_CONFIG_PATH: /app/vendor/cairo/lib/pkgconfig:/app/vendor/fontconfig/lib/pkgconfig:/app/vendor/pixman/lib/pkgconfig:/app/vendor/libpng/lib/pkgconfig:/app/vendor/DirectFB/lib/pkgconfig:/app/vendor/freetype/lib/pkgconfig
+default_process_types:
+  web: R -e "shiny::runApp('.', as.numeric(Sys.getenv(\"PORT\")))"
+EOF

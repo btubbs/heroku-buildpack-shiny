@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+shopt -s extglob
+
+# parse and derive params
+BUILD_DIR=$1
+CACHE_DIR="$2/vendor"
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
+
+# config
+R_VERSION="3.0.2"
+S3_BUCKET="heroku-buildpack-r"
+R_BINARIES="http://yg-build.s3.amazonaws.com/R-heroku-3.0.2-20131105.0015.tar.gz"
+VENDOR_DIR="$BUILD_DIR/vendor"
+R_HOME="$VENDOR_DIR/R"
+CRAN_MIRROR="http://cran.revolutionanalytics.com"
+
+mkdir -p $CACHE_DIR
+mkdir -p $VENDOR_DIR
+
+# vendor R into the slug
+echo "Vendoring R $R_VERSION" | indent
+
+# Check if we can pull from cache rather than download tar
+if [ "$(cat $CACHE_DIR/R/bin/.version 2>/dev/null)" = "$R_VERSION" ]
+then
+  echo "Desired R version ($R_VERSION) cached" | indent
+  mkdir -p $VENDOR_DIR
+  cp -R $CACHE_DIR/* $VENDOR_DIR
+else
+  # download and unpack binaries
+  echo "Downloading and unpacking R binaries" | indent
+  mkdir -p $VENDOR_DIR && curl $R_BINARIES -s -o - | tar xzf - -C $VENDOR_DIR
+fi
+
+mkdir -p /app/vendor
+
+# need to copy the binaries to /app/vendor so that R works
+cp -R $VENDOR_DIR/* /app/vendor/
+
+# R needs to know where gfortran and glibc header files are
+# For buildpacks that get run after, need to update PATH with location of R
+export PATH=/app/vendor/R/bin/:/app/vendor/gcc-4.3/bin:$PATH
+export LDFLAGS=-L/app/vendor/gcc-4.3/lib64
+export CPPFLAGS=-I/app/vendor/glibc-2.7/string -I/app/vendor/glibc-2.7/time -I/app/vendor/cairo/include/cairo/include
+export LD_LIBRARY_PATH=/app/vendor/cairo:/app/vendor/fontconfig:/app/vendor/pixman:/app/vendor/libpng:/app/vendor/DirectFB:/app/vendor/freetype
+export PKG_CONFIG_PATH=/app/vendor/cairo/lib/pkgconfig:/app/vendor/fontconfig/lib/pkgconfig:/app/vendor/pixman/lib/pkgconfig:/app/vendor/libpng/lib/pkgconfig:/app/vendor/DirectFB/lib/pkgconfig:/app/vendor/freetype/lib/pkgconfig
+export R_INCLUDE=/app/vendor/R/lib64/R/include
+
+# set the CRAN mirror and run the init.r program
+if [ -f $BUILD_DIR/packages.R ]; then
+  echo "Installing packages from packages.R" | indent
+  mkdir -p /app/vendor/R/lib64/R/doc/html
+  touch /app/vendor/R/lib64/R/doc/html/R.css
+/app/vendor/R/bin/R -s <<RPROG > indent
+  Sys.setenv(BUILD_DIR="$BUILD_DIR")
+  setwd("$BUILD_DIR")
+  r <- getOption("repos");
+  r["CRAN"] <- "$CRAN_MIRROR";
+  options(repos=r);
+  `cat $BUILD_DIR/packages.R`
+RPROG
+fi
+
+echo "R $R_VERSION successfully installed" | indent
+
+# need to copy binaries back so that any installed packages are included in the slug
+rm -rf $VENDOR_DIR && mkdir -p $VENDOR_DIR
+cp -R /app/vendor/* $VENDOR_DIR/
+
+# removed unneeded files to make slug smaller
+pushd $VENDOR_DIR/gcc-4.3 > /dev/null && rm -rf !(lib64) && popd > /dev/null
+pushd $VENDOR_DIR/glibc-2.7 > /dev/null && rm -rf !(string|time) && popd > /dev/null
+
+# HACK
+cp $VENDOR_DIR/gcc-4.3/lib64/* $VENDOR_DIR/R/lib64/R/lib
+
+# Write a sane .Rprofile
+cat > $BUILD_DIR/.Rprofile <<RPROFILE
+r <- getOption("repos");
+r["CRAN"] <- "$CRAN_MIRROR";
+options(repos=r);
+options(bitmapType="cairo")
+RPROFILE
