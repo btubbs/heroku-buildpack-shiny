@@ -10,8 +10,8 @@ https://github.com/btubbs/shiny-example-1.
 Instructions
 ------------
 
-These instructions assume that you have installed the Heroku Toolbelt and
-logged in with it.
+These instructions assume that you have installed the [Heroku
+Toolbelt](https://toolbelt.heroku.com/) and logged in with it.
 
 To deploy an app using this buildpack, do the following:
 
