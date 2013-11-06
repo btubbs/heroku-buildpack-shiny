@@ -10,7 +10,7 @@ https://github.com/btubbs/shiny-example-1.
 Instructions
 ------------
 
-These instructions assume that you have already signed up for an [Heroku Account](https://id.heroku.com/signup/www-home-top) and downloaded the [Heroku Toolbelt](https://toolbelt.heroku.com/)
+These instructions assume that you have already signed up for an [Heroku Account](https://id.heroku.com/signup/www-home-top) and installed the [Heroku Toolbelt](https://toolbelt.heroku.com/)
 
 #### Create App
 
