@@ -1,3 +1,12 @@
+Notice
+======
+
+Heroku has changed their stack since the time that this buildpack was developed, and the custom compiled-for-Heroku version of R used by this buildpack does not work for newly-built apps.
+
+You may have better luck with [heroku-buildpack-r](https://github.com/virtualstaticvoid/heroku-buildpack-r), whose maintainer is more diligent about building a new R version each time Heroku breaks the old one.
+
+
+
 Heroku Buildpack Shiny
 ===========================
 
